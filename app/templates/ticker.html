@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <title>{{symbol}} - Stock Price</title>
+    </head>
+    <body>
+	    <h3>Current price for {{symbol}}: <font id='price' color='black'>$0.00</font></h3>
+	    <p id='timestamp'>As of 00:00</p>
+	    <img src={{graph}}><img/>
+
+	    <script>
+		lastPrice = null;
+	   	xhttp = new XMLHttpRequest();
+		function getPrice(){
+			xhttp.open("GET", "https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols={{symbol}}&apikey=0ZOBQU6TFH7M286O", true);
+			xhttp.send();
+			xhttp.onreadystatechange = function(){
+				if(this.status == "200"){
+
+					parsed = JSON.parse(this.responseText);
+					quote = parsed["Stock Quotes"][0];
+					price = quote["2. price"];
+					timestamp = quote["4. timestamp"];
+
+					if(lastPrice != price)
+						if(price > lastPrice)
+							document.getElementById('price').color = "green";
+						else
+							document.getElementById('price').color = "red";
+
+					lastPrice = parseFloat(price);
+
+					document.getElementById('price').innerHTML = document.getElementById('price').innerHTML.replace(/\d+(\.\d+)?$/g, price);
+					document.getElementById('timestamp').innerHTML = "As of " + timestamp;
+				}
+			}
+		}
+
+		getPrice();
+		setInterval(getPrice, {{interval}});
+	    </script>
+
+    </body>
+</html>
